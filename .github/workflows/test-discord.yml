@@ -1,17 +1,33 @@
-name: Prueba de Alerta a Discord
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  enviar-alerta:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Enviar mensaje directo por comando curl
-        run: |
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d '{"username": "Fábrica CI/CD", "content": "🚀 ¡CI/CD Funcionando al 100%! Alerta directa enviada desde los servidores de GitHub."}' \
-               "${{ secrets.DISCORD_WEBHOOK }}"
+      - name: Enviar tarjeta dinámica a Discord
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "📋 NUEVA TAREA ASIGNADA"
+          color: "0x2e6930" # Color verde de éxito para el borde
+          description: "El pipeline de CI/CD ha procesado una nueva asignación de requerimientos."
+          
+          # Diseñas tus campos de forma limpia y directa sin preocuparte por comillas de curl:
+          username: "Gestor de Tareas CI/CD"
+          embeddedFields: |
+            [
+              {
+                "name": "👤 Desarrollador Responsable",
+                "value": "**${{ steps.info_tarea.outputs.desarrollador }}**",
+                "inline": true
+              },
+              {
+                "name": "📂 Archivo de Control",
+                "value": "`${{ steps.info_tarea.outputs.archivo }}`",
+                "inline": true
+              },
+              {
+                "name": "📝 Descripción Interna",
+                "value": "${{ steps.info_tarea.outputs.resumen }}",
+                "inline": false
+              },
+              {
+                "name": "🔗 Enlace de Seguimiento",
+                "value": "[Revisar requerimientos en GitHub](https://github.com{{ github.repository }}/blob/main/${{ steps.info_tarea.outputs.archivo }})",
+                "inline": false
+              }
+            ]
