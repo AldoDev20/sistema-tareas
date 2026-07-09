@@ -10,16 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Enviar mensaje de prueba a Discord
-        uses: RoseSecurity/discord-webhook-action@v1.0.1
+        uses: sinzyo/discord-webhook-action@v1
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-          username: "Robot de GitHub Actions"
-          title: "🚀 ¡CI/CD Funcionando con Éxito!"
-          description: |
-            La computadora virtual de GitHub se ha encendido correctamente desde la consola.
-            
-            👤 **Hizo el push:** ${{ github.actor }}
-            📦 **Repositorio:** ${{ github.repository }}
-            🌿 **Rama:** ${{ github.ref_name }}
-          color: "0x00FF00"
-          footer: "Prueba desde la consola local"
+          url: ${{ secrets.DISCORD_WEBHOOK }}
+          description: "🚀 ¡CI/CD Funcionando con Éxito desde GitHub Actions! Computadora virtual encendida por ${{ github.actor }}."
