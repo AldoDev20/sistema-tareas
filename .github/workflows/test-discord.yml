@@ -1,33 +1,30 @@
-      - name: Enviar tarjeta dinámica a Discord
-        uses: sarisia/actions-status-discord@v1
+name: Control de Tareas con Bot de Discord
+
+on:
+  push:
+    paths:
+      - 'tareas/**'
+
+jobs:
+  notificar-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "📋 NUEVA TAREA ASIGNADA"
-          color: "0x2e6930" # Color verde de éxito para el borde
-          description: "El pipeline de CI/CD ha procesado una nueva asignación de requerimientos."
-          
-          # Diseñas tus campos de forma limpia y directa sin preocuparte por comillas de curl:
-          username: "Gestor de Tareas CI/CD"
-          embeddedFields: |
-            [
-              {
-                "name": "👤 Desarrollador Responsable",
-                "value": "**${{ steps.info_tarea.outputs.desarrollador }}**",
-                "inline": true
-              },
-              {
-                "name": "📂 Archivo de Control",
-                "value": "`${{ steps.info_tarea.outputs.archivo }}`",
-                "inline": true
-              },
-              {
-                "name": "📝 Descripción Interna",
-                "value": "${{ steps.info_tarea.outputs.resumen }}",
-                "inline": false
-              },
-              {
-                "name": "🔗 Enlace de Seguimiento",
-                "value": "[Revisar requerimientos en GitHub](https://github.com{{ github.repository }}/blob/main/${{ steps.info_tarea.outputs.archivo }})",
-                "inline": false
-              }
-            ]
+          fetch-depth: 2
+
+      # Este paso identifica cuál fue el archivo de tarea que se acaba de subir
+      - name: Detectar archivo de tarea nuevo
+        id: detectar
+        run: |
+          ARCHIVO_NUEVO=$(git diff --name-only HEAD~1 HEAD | grep '^tareas/' | head -n 1)
+          echo "archivo=$ARCHIVO_NUEVO" >> $GITHUB_OUTPUT
+
+      # Aquí corre el ejemplo de Discord que encontraste para leer y publicar el archivo completo
+      - name: Discord Courier
+        uses: snorrwe/discord-action@v1.0.10
+        with:
+          discord_token: ${{ secrets.DISCORD_BOT_TOKEN }}
+          discord_channel: "1524568941890896002"
+          post_file: "${{ steps.detectar.outputs.archivo }}"
